@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HKDSE M1 Math - Interactive Confidence Interval Master</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .code-font { font-family: 'Fira Code', monospace; }
+        /* Custom Smooth Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Fun Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 3s infinite ease-in-out; }
+        
+        .tab-btn.active {
+            background-color: #4f46e5;
+            color: #ffffff;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.35);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/20 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 pointer-events-none">
+        <div id="toast-icon" class="text-emerald-400 text-lg"><i class="fa-solid fa-circle-check"></i></div>
+        <span id="toast-msg" class="text-sm font-semibold">Action completed!</span>
+    </div>
+
+    <!-- Top Vibrant Header -->
+    <header class="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-white/10 backdrop-blur-md text-amber-300 p-2.5 rounded-2xl shadow-inner border border-white/20">
+                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                        HKDSE M1 <span class="bg-clip-text text-transparent bg-gradient-to-r from-amber-200 to-amber-400">CI Visual Lab</span> 🎯
+                    </h1>
+                    <p class="text-xs text-indigo-100/90 font-medium">Interactive Confidence Interval & Estimation Explorer</p>
+                </div>
+            </div>
+            
+            <!-- Gamified Student Rank Badge -->
+            <div class="flex items-center bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 shadow-sm">
+                <div class="mr-3 text-right">
+                    <div class="text-[10px] uppercase font-bold tracking-wider text-indigo-200">Learning Progress</div>
+                    <div id="rank-title" class="text-xs font-bold text-amber-300 flex items-center gap-1">
+                        <i class="fa-solid fa-award"></i> Level 1: DSE Novice
+                    </div>
+                </div>
+                <div class="w-12 bg-white/20 rounded-full h-2 overflow-hidden">
+                    <div id="rank-bar" class="bg-amber-400 h-full transition-all duration-500" style="width: 25%;"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white/80 backdrop-blur-md border-b border-indigo-100 sticky top-[65px] z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-2 overflow-x-auto py-2.5 no-scrollbar" id="tabContainer">
+                <button onclick="switchTab('sim')" id="tab-sim" class="tab-btn active px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-indigo-50 flex items-center space-x-2 whitespace-nowrap transition-all">
+                    <i class="fa-solid fa-flask text-amber-500"></i>
+                    <span>1. Monte Carlo Simulator</span>
+                </button>
+                <button onclick="switchTab('calc')" id="tab-calc" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-indigo-50 flex items-center space-x-2 whitespace-nowrap transition-all">
+                    <i class="fa-solid fa-calculator text-indigo-500"></i>
+                    <span>2. Step-by-Step Solver</span>
+                </button>
+                <button onclick="switchTab('width')" id="tab-width" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-indigo-50 flex items-center space-x-2 whitespace-nowrap transition-all">
+                    <i class="fa-solid fa-sliders text-emerald-500"></i>
+                    <span>3. Sample Size Lab</span>
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold text-slate-600 hover:bg-indigo-50 flex items-center space-x-2 whitespace-nowrap transition-all">
+                    <i class="fa-solid fa-bullseye text-rose-500"></i>
+                    <span>4. Misconception Quiz</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Body -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- TAB 1: MONTE CARLO SIMULATOR (HERO FEATURE) -->
+        <section id="sec-sim" class="tab-content block space-y-6">
+            <div class="bg-white border border-indigo-100 rounded-3xl p-5 sm:p-6 shadow-xl shadow-indigo-100/50 space-y-5">
+                
+                <!-- Simulator Header & Action Bar -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-amber-400 text-slate-900 font-extrabold text-xs px-2.5 py-1 rounded-full uppercase tracking-wide">Primary Focus</span>
+                            <span class="bg-indigo-100 text-indigo-700 font-bold text-xs px-2.5 py-1 rounded-full">DSE M1 Core Concept</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 mt-1 flex items-center gap-2.5">
+                            <span class="bg-indigo-600 text-white p-2 rounded-xl text-lg shadow-md shadow-indigo-200"><i class="fa-solid fa-cubes"></i></span>
+                            Interactive Monte Carlo Sampling Lab
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
+                            Simulate repeated random sampling from a population with true mean <span class="code-font font-bold text-indigo-600">&mu;</span>. Watch how intervals capture or miss the target!
+                        </p>
+                    </div>
+
+                    <!-- Main Simulation Action Buttons -->
+                    <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <button onclick="runSimulation(1)" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 border border-slate-200 shadow-sm active:scale-95">
+                            <i class="fa-solid fa-plus text-indigo-600"></i> +1 Sample
+                        </button>
+                        <button onclick="runSimulation(50)" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-black text-xs sm:text-sm transition-all shadow-md shadow-indigo-200 flex items-center justify-center gap-1.5 active:scale-95">
+                            <i class="fa-solid fa-bolt text-amber-300"></i> +50 Samples
+                        </button>
+                        <button onclick="resetSimulation()" class="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-xs sm:text-sm transition-all active:scale-95">
+                            <i class="fa-solid fa-rotate-right"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- COMPACT MOBILE & IPAD FRIENDLY CONTROLS PANEL -->
+                <div class="bg-gradient-to-r from-indigo-50/70 via-slate-50 to-purple-50/50 p-3.5 sm:p-4 rounded-2xl border border-indigo-100/80 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between border-b border-indigo-100/60 pb-2">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-indigo-950 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i> Compact Controls Panel
+                        </h3>
+                        <span class="text-[11px] font-bold text-slate-500 hidden sm:inline">Optimized for iPad & Touch Devices</span>
+                    </div>
+
+                    <!-- Responsive Compact Grid (Fits 2 cols on mobile, 4-5 cols on iPad/Desktop) -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 text-xs">
+                        
+                        <!-- True Mean -->
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                            <div class="flex justify-between font-bold text-slate-700 text-[11px]">
+                                <span>True Mean (&mu;):</span>
+                                <span id="sim-mu-val" class="text-indigo-600 code-font">100</span>
+                            </div>
+                            <input type="range" id="sim-mu" min="50" max="150" value="100" class="w-full h-1.5 mt-1.5 accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSimParams()">
+                        </div>
+
+                        <!-- Std Dev -->
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                            <div class="flex justify-between font-bold text-slate-700 text-[11px]">
+                                <span>Std Dev (&sigma;):</span>
+                                <span id="sim-sigma-val" class="text-indigo-600 code-font">15</span>
+                            </div>
+                            <input type="range" id="sim-sigma" min="5" max="30" value="15" class="w-full h-1.5 mt-1.5 accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSimParams()">
+                        </div>
+
+                        <!-- Sample Size n -->
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+                            <div class="flex justify-between font-bold text-slate-700 text-[11px]">
+                                <span>Sample Size (n):</span>
+                                <span id="sim-n-val" class="text-indigo-600 code-font">36</span>
+                            </div>
+                            <input type="range" id="sim-n" min="10" max="200" value="36" class="w-full h-1.5 mt-1.5 accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSimParams()">
+                        </div>
+
+                        <!-- Confidence Level Selection -->
+                        <div class="bg-white p-2 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between col-span-2 sm:col-span-1">
+                            <span class="font-bold text-slate-700 text-[11px] block mb-1">Confidence (1-&alpha;):</span>
+                            <div class="grid grid-cols-3 gap-1">
+                                <button type="button" onclick="setSimCL(0.90)" id="sim-cl-90" class="sim-cl-btn py-1 rounded-lg text-[11px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200 hover:border-indigo-400">90%</button>
+                                <button type="button" onclick="setSimCL(0.95)" id="sim-cl-95" class="sim-cl-btn py-1 rounded-lg text-[11px] font-extrabold bg-indigo-600 text-white border border-indigo-600 shadow-xs">95%</button>
+                                <button type="button" onclick="setSimCL(0.99)" id="sim-cl-99" class="sim-cl-btn py-1 rounded-lg text-[11px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200 hover:border-indigo-400">99%</button>
+                            </div>
+                        </div>
+
+                        <!-- Animation Speed -->
+                        <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between col-span-2 sm:col-span-2 lg:col-span-1">
+                            <div class="flex justify-between font-bold text-slate-700 text-[11px]">
+                                <span>Speed:</span>
+                                <span id="sim-speed-val" class="text-indigo-600">Normal</span>
+                            </div>
+                            <input type="range" id="sim-speed" min="1" max="5" value="3" class="w-full h-1.5 mt-1.5 accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateSpeedLabel()">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Live Metrics Dashboards -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center shadow-xs">
+                        <span class="text-[10px] sm:text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Total Samples</span>
+                        <span id="stat-total" class="text-xl sm:text-2xl font-black text-slate-800">0</span>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 text-center shadow-xs">
+                        <span class="text-[10px] sm:text-[11px] font-bold text-emerald-600 uppercase tracking-wider block">Captured &mu;</span>
+                        <span id="stat-captured" class="text-xl sm:text-2xl font-black text-emerald-600">0</span>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-2xl border border-rose-200 text-center shadow-xs">
+                        <span class="text-[10px] sm:text-[11px] font-bold text-rose-600 uppercase tracking-wider block">Missed &mu;</span>
+                        <span id="stat-missed" class="text-xl sm:text-2xl font-black text-rose-600">0</span>
+                    </div>
+                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-200 text-center shadow-xs">
+                        <span class="text-[10px] sm:text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">Coverage Rate</span>
+                        <span id="stat-rate" class="text-xl sm:text-2xl font-black text-indigo-700">0.0%</span>
+                    </div>
+                </div>
+
+                <!-- Simulation Canvas Box -->
+                <div class="relative bg-white rounded-2xl border-2 border-indigo-100 p-2 overflow-hidden min-h-[380px] flex items-center justify-center shadow-inner">
+                    <canvas id="simCanvas" class="w-full h-[380px] block"></canvas>
+                    <div id="simEmptyState" class="absolute inset-0 bg-white/95 backdrop-blur-xs flex flex-col items-center justify-center text-slate-400 p-6 pointer-events-none">
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-3xl mb-3 shadow-inner">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <p class="text-base font-extrabold text-slate-800">Simulation Ready!</p>
+                        <p class="text-xs text-slate-500 mt-1 text-center max-w-md">
+                            Click <strong class="text-indigo-600">+1 Sample</strong> or <strong class="text-indigo-600">+50 Samples</strong> above to run random sampling and watch confidence intervals form live.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PROMINENT DSE M1 EXAM KEY TAKEAWAYS SPOTLIGHT -->
+                <div class="bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-100/50 border-2 border-amber-300/80 rounded-3xl p-5 shadow-lg shadow-amber-100/60 space-y-4">
+                    <div class="flex items-center justify-between flex-wrap gap-2 border-b border-amber-200/80 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-amber-500 text-white p-2.5 rounded-2xl text-xl shadow-md shadow-amber-200">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-extrabold text-amber-950 flex items-center gap-2">
+                                    HKDSE M1 Exam Key Takeaway & Interpretation Rules 🎯
+                                </h3>
+                                <p class="text-xs text-amber-800 font-medium">
+                                    Must-know concepts for HKDSE M1 Paper 1 Section A & B written questions
+                                </p>
+                            </div>
+                        </div>
+                        <span class="bg-amber-200/80 text-amber-900 font-black text-xs px-3 py-1 rounded-full uppercase tracking-wider">
+                            Critical Exam Focus
+                        </span>
+                    </div>
+
+                    <!-- Core DSE Rules Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <!-- Concept 1: Frequentist Interpretation -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-200/80 shadow-xs space-y-1.5">
+                            <div class="font-bold text-amber-900 flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-rotate text-amber-600"></i>
+                                1. What "95% Confidence" REALLY Means
+                            </div>
+                            <p class="text-slate-700 leading-relaxed font-medium">
+                                In HKDSE M1, the true population mean <span class="code-font font-bold text-indigo-700">&mu;</span> is a <strong>FIXED constant</strong>, NOT a random variable.
+                            </p>
+                            <p class="text-slate-700 leading-relaxed font-medium">
+                                If we repeat the sampling process 100 times, approximately <span class="font-extrabold text-emerald-700">95 of the constructed intervals</span> will contain <span class="code-font font-bold">&mu;</span>.
+                            </p>
+                        </div>
+
+                        <!-- Concept 2: The DSE Misconception Trap -->
+                        <div class="bg-white p-4 rounded-2xl border border-amber-200/80 shadow-xs space-y-1.5">
+                            <div class="font-bold text-amber-900 flex items-center gap-2 text-sm">
+                                <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                                2. The Classic DSE Trap to Avoid
+                            </div>
+                            <p class="text-slate-700 leading-relaxed font-medium">
+                                Once a specific interval (e.g. <span class="code-font font-bold">(45.2, 52.8)</span>) is calculated, <span class="underline decoration-rose-400 font-bold">it either contains &mu; or it does not</span>.
+                            </p>
+                            <p class="text-rose-700 font-bold bg-rose-50 p-2 rounded-xl border border-rose-200">
+                                ❌ NEVER say: "There is a 95% probability that &mu; lies inside (45.2, 52.8)." (0 marks in DSE!)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- DSE Marking Scheme Phrase Comparison Table -->
+                    <div class="bg-white rounded-2xl border border-amber-200/80 p-3.5 space-y-2">
+                        <span class="text-xs font-black text-amber-950 uppercase tracking-wider block">
+                            <i class="fa-solid fa-pen-to-square text-amber-600 mr-1"></i> HKDSE Written Question Phrase Checker
+                        </span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-950 space-y-1">
+                                <span class="font-black text-emerald-700 block flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-check"></i> CORRECT DSE Phrasing:
+                                </span>
+                                <p class="font-semibold italic">
+                                    "We are 95% confident that the true population mean &mu; lies between 45.2 and 52.8."
+                                </p>
+                            </div>
+                            <div class="p-3 bg-rose-50 rounded-xl border border-rose-200 text-rose-950 space-y-1">
+                                <span class="font-black text-rose-700 block flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-xmark"></i> WRONG DSE Phrasing (Lose Marks):
+                                </span>
+                                <p class="font-semibold italic">
+                                    "The probability that &mu; lies between 45.2 and 52.8 is 0.95."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 2: CI CALCULATOR WITH DSE M1 STEPS -->
+        <section id="sec-calc" class="tab-content hidden space-y-6">
+            <div class="bg-white border border-indigo-100 rounded-3xl p-6 shadow-xl shadow-indigo-100/50">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2.5">
+                        <span class="bg-indigo-100 text-indigo-700 p-2 rounded-xl text-base"><i class="fa-solid fa-square-root-variable"></i></span>
+                        Step-by-Step DSE M1 Solution Generator
+                    </h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Input your problem values to generate full DSE M1 exam-style solution steps and proper mathematical formatting.
+                    </p>
+                </div>
+
+                <!-- Type Selector Pills -->
+                <div class="flex p-1 bg-slate-100 rounded-2xl max-w-md mb-6 border border-slate-200/80">
+                    <button id="calc-type-mean" onclick="switchCalcType('mean')" class="flex-1 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-indigo-700 bg-white shadow-sm flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-solid fa-arrow-trend-up"></i> Mean (&mu;)
+                    </button>
+                    <button id="calc-type-prop" onclick="switchCalcType('prop')" class="flex-1 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-solid fa-percent"></i> Proportion (p)
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <!-- Inputs Form -->
+                    <div class="lg:col-span-5 bg-gradient-to-b from-indigo-50/40 to-slate-50 p-5 rounded-2xl border border-indigo-100 space-y-4">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-indigo-900 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i> Sample Parameters
+                        </h3>
+
+                        <!-- MEAN INPUTS -->
+                        <div id="inputs-mean" class="space-y-3.5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Sample Mean (<span class="code-font text-indigo-600">&bar;x</span>):</label>
+                                <input type="number" id="input-xbar" value="52.4" step="any" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Standard Deviation (<span class="code-font text-indigo-600">&sigma;</span> or <span class="code-font text-indigo-600">s</span>):</label>
+                                <input type="number" id="input-std" value="8.2" min="0.001" step="any" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                <p class="text-[11px] font-medium text-slate-500 mt-1">Use population std dev &sigma; if known, or sample std dev s (if n &ge; 30).</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Sample Size (<span class="code-font text-indigo-600">n</span>):</label>
+                                <input type="number" id="input-n-mean" value="64" min="1" step="1" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- PROPORTION INPUTS -->
+                        <div id="inputs-prop" class="space-y-3.5 hidden">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Successes (<span class="code-font text-indigo-600">x</span>) / Sample Proportion (<span class="code-font text-indigo-600">p̂</span>):</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-[11px] text-slate-500 font-medium block mb-0.5">Successes (x):</span>
+                                        <input type="number" id="input-x-prop" value="45" min="0" step="1" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="syncPropInput('x')">
+                                    </div>
+                                    <div>
+                                        <span class="text-[11px] text-slate-500 font-medium block mb-0.5">Proportion (p̂):</span>
+                                        <input type="number" id="input-phat" value="0.45" min="0" max="1" step="0.01" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="syncPropInput('phat')">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Sample Size (<span class="code-font text-indigo-600">n</span>):</label>
+                                <input type="number" id="input-n-prop" value="100" min="1" step="1" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="syncPropInput('n')">
+                                <p class="text-[11px] font-semibold text-emerald-700 mt-1" id="prop-condition-check">
+                                    <i class="fa-solid fa-circle-check"></i> Condition check: n·p̂ &ge; 10 and n(1-p̂) &ge; 10 satisfied.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Common Confidence Level -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Confidence Level:</label>
+                            <select id="calc-cl-select" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                <option value="0.90">90% Confidence Level (z = 1.645)</option>
+                                <option value="0.95" selected>95% Confidence Level (z = 1.96)</option>
+                                <option value="0.99">99% Confidence Level (z = 2.575)</option>
+                                <option value="custom">Custom Confidence Level</option>
+                            </select>
+                        </div>
+
+                        <div id="custom-cl-box" class="hidden">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Custom Confidence Level (%):</label>
+                            <input type="number" id="input-custom-cl" value="98" min="50" max="99.99" step="0.1" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        </div>
+
+                        <button onclick="calculateCI()" class="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-extrabold rounded-xl transition-all shadow-md shadow-indigo-200 flex items-center justify-center gap-2 active:scale-98">
+                            <i class="fa-solid fa-calculator text-amber-300"></i> Generate DSE Solution
+                        </button>
+                    </div>
+
+                    <!-- Step-by-Step DSE Working Display -->
+                    <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+                                <h3 class="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="fa-solid fa-file-signature text-emerald-600"></i> HKDSE Standard Solution Presentation
+                                </h3>
+                                <button onclick="copySolution()" class="text-xs text-indigo-600 font-bold hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-200 transition-all flex items-center gap-1.5">
+                                    <i class="fa-regular fa-copy"></i> Copy Steps
+                                </button>
+                            </div>
+
+                            <div id="solution-steps" class="space-y-4 code-font text-sm text-slate-800">
+                                <!-- Steps injected dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Result Summary Box -->
+                        <div id="solution-summary-box" class="mt-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-700 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div>
+                                <span class="text-xs text-indigo-200 font-semibold uppercase block">Final Result Interval:</span>
+                                <span id="final-ci-text" class="text-xl font-extrabold code-font text-amber-300">(50.3900, 54.4100)</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-indigo-200 font-semibold uppercase block">Margin of Error (E):</span>
+                                <span id="final-me-text" class="text-lg font-bold code-font text-white">&plusmn; 2.0100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: SAMPLE SIZE & WIDTH EXPLORER -->
+        <section id="sec-width" class="tab-content hidden space-y-6">
+            <div class="bg-white border border-indigo-100 rounded-3xl p-6 shadow-xl shadow-indigo-100/50">
+                <div class="border-b border-slate-100 pb-4 mb-6">
+                    <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2.5">
+                        <span class="bg-indigo-100 text-indigo-700 p-2 rounded-xl text-base"><i class="fa-solid fa-sliders"></i></span>
+                        Sample Size & Interval Width Lab
+                    </h2>
+                    <p class="text-sm text-slate-600 mt-1">
+                        Discover how sample size <span class="code-font text-indigo-600 font-bold">n</span>, standard deviation <span class="code-font text-indigo-600 font-bold">&sigma;</span>, and confidence level affect the width of an interval.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Dynamic Width Visualizer -->
+                    <div class="bg-gradient-to-b from-indigo-50/40 to-slate-50 p-5 rounded-2xl border border-indigo-100 space-y-5">
+                        <h3 class="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-indigo-600"></i> Interactive Width Experiment
+                        </h3>
+
+                        <!-- Slider Inputs -->
+                        <div class="space-y-3.5">
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-sm space-y-1">
+                                <div class="flex justify-between text-xs font-bold text-slate-700">
+                                    <span>Sample Size (n):</span>
+                                    <span id="exp-n-val" class="text-indigo-600 code-font">100</span>
+                                </div>
+                                <input type="range" id="exp-n" min="10" max="1000" step="10" value="100" class="w-full accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateWidthExperiment()">
+                            </div>
+
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-sm space-y-1">
+                                <div class="flex justify-between text-xs font-bold text-slate-700">
+                                    <span>Standard Deviation (&sigma;):</span>
+                                    <span id="exp-sigma-val" class="text-indigo-600 code-font">20</span>
+                                </div>
+                                <input type="range" id="exp-sigma" min="5" max="50" step="1" value="20" class="w-full accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateWidthExperiment()">
+                            </div>
+
+                            <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-sm space-y-1">
+                                <div class="flex justify-between text-xs font-bold text-slate-700">
+                                    <span>Confidence Level:</span>
+                                    <span id="exp-cl-val" class="text-indigo-600 code-font">95% (z = 1.96)</span>
+                                </div>
+                                <input type="range" id="exp-cl" min="1" max="3" step="1" value="2" class="w-full accent-indigo-600 bg-slate-200 rounded-lg cursor-pointer" oninput="updateWidthExperiment()">
+                            </div>
+                        </div>
+
+                        <!-- Computed Metrics Card -->
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-600 font-bold">Margin of Error (E = z &middot; &sigma; / &sqrt;n):</span>
+                                <span id="exp-me-val" class="text-emerald-600 font-extrabold code-font text-sm">3.920</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-600 font-bold">Total Interval Width (2E):</span>
+                                <span id="exp-width-val" class="text-indigo-600 font-extrabold code-font text-sm">7.840</span>
+                            </div>
+
+                            <!-- Visual Bar Representation -->
+                            <div class="pt-2">
+                                <span class="text-[11px] font-bold text-slate-500 block mb-1">Visual Interval Width Preview:</span>
+                                <div class="w-full bg-slate-100 h-7 rounded-xl relative overflow-hidden flex items-center justify-center border border-slate-200">
+                                    <div id="exp-bar" class="bg-gradient-to-r from-indigo-500 to-violet-600 h-full transition-all duration-300 rounded-lg" style="width: 50%;"></div>
+                                    <span class="absolute text-[11px] font-mono text-white font-extrabold drop-shadow">&bar;x &plusmn; <span id="exp-bar-text">3.92</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key DSE Concept Callout -->
+                        <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1 shadow-sm">
+                            <div class="font-bold text-amber-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-triangle-exclamation text-amber-600"></i> HKDSE Quadrupling Rule:
+                            </div>
+                            <p>To <strong>halve</strong> the width of a confidence interval (cut error by 2), you must <strong>quadruple (4&times;)</strong> the sample size <span class="code-font font-bold">n</span>!</p>
+                        </div>
+                    </div>
+
+                    <!-- Minimum Sample Size Calculator -->
+                    <div class="bg-gradient-to-b from-indigo-50/40 to-slate-50 p-5 rounded-2xl border border-indigo-100 space-y-4">
+                        <h3 class="text-xs font-black text-indigo-900 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-emerald-600"></i> Least Sample Size (<span class="code-font">n</span>) Required Solver
+                        </h3>
+                        <p class="text-xs text-slate-600 font-medium">
+                            Standard DSE Question Type: <em>"Find the least sample size required such that the error bound does not exceed E..."</em>
+                        </p>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Target Max Error (<span class="code-font text-indigo-600">E</span>):</label>
+                                <input type="number" id="req-e" value="1.5" min="0.001" step="any" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="solveMinN()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Standard Deviation (<span class="code-font text-indigo-600">&sigma;</span>):</label>
+                                <input type="number" id="req-sigma" value="10" min="0.001" step="any" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" oninput="solveMinN()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Confidence Level:</label>
+                                <select id="req-cl" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-sm text-slate-800 font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none" onchange="solveMinN()">
+                                    <option value="1.645">90% (z = 1.645)</option>
+                                    <option value="1.96" selected>95% (z = 1.96)</option>
+                                    <option value="2.575">99% (z = 2.575)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Calculated Min N Solution -->
+                        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-2 code-font text-xs">
+                            <div class="text-slate-500 font-bold">Formula: <span class="text-indigo-600">n &ge; (z &middot; &sigma; / E)&sup2;</span></div>
+                            <div id="req-step1" class="text-slate-700 font-semibold">n &ge; (1.96 &times; 10 / 1.5)&sup2;</div>
+                            <div id="req-step2" class="text-slate-700 font-semibold">n &ge; 170.7378...</div>
+                            <div class="pt-2 border-t border-slate-200 flex justify-between items-center font-sans">
+                                <span class="text-xs font-extrabold text-emerald-700">Least integer sample size n:</span>
+                                <span id="req-final-n" class="text-2xl font-black text-emerald-600 code-font bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">171</span>
+                            </div>
+                            <p class="text-[11px] font-bold text-amber-700 font-sans mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-info"></i> Always round <strong>UP</strong> (&lceil;n&rceil;), even if the decimal part is tiny!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: MISCONCEPTION QUIZ -->
+        <section id="sec-quiz" class="tab-content hidden space-y-6">
+            <div class="bg-white border border-indigo-100 rounded-3xl p-6 shadow-xl shadow-indigo-100/50">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 pb-4 mb-6 gap-3">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2.5">
+                            <span class="bg-indigo-100 text-indigo-700 p-2 rounded-xl text-base"><i class="fa-solid fa-circle-question"></i></span>
+                            DSE M1 Misconception Buster Quiz
+                        </h2>
+                        <p class="text-sm text-slate-600 mt-1">
+                            Challenge yourself with real HKDSE M1 multiple-choice traps and concepts.
+                        </p>
+                    </div>
+                    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 rounded-2xl text-white text-xs font-black shadow-md">
+                        Score: <span id="quiz-score" class="text-amber-300 font-extrabold text-base">0</span> / <span id="quiz-total">4</span>
+                    </div>
+                </div>
+
+                <div id="quiz-container" class="space-y-6">
+                    <!-- Questions rendered via JavaScript -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /* GLOBAL STATE & GAMIFICATION */
+        let currentTab = 'sim';
+        let currentCalcType = 'mean';
+        let userActivityScore = 1; // Tracks progress
+
+        function showToast(msg, icon = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-icon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        function addActivityPoints(pts) {
+            userActivityScore = Math.min(100, userActivityScore + pts);
+            const rankBar = document.getElementById('rank-bar');
+            const rankTitle = document.getElementById('rank-title');
+            rankBar.style.width = userActivityScore + '%';
+
+            if (userActivityScore >= 80) {
+                rankTitle.innerHTML = '<i class="fa-solid fa-crown text-amber-300"></i> Level 4: DSE 5** Master';
+            } else if (userActivityScore >= 50) {
+                rankTitle.innerHTML = '<i class="fa-solid fa-star text-amber-300"></i> Level 3: DSE Star Scholar';
+            } else if (userActivityScore >= 25) {
+                rankTitle.innerHTML = '<i class="fa-solid fa-graduation-cap text-amber-300"></i> Level 2: Statistics Explorer';
+            }
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(`sec-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('active');
+
+            if (tabId === 'sim') {
+                resizeCanvas();
+                drawSimCanvas();
+            }
+            addActivityPoints(5);
+        }
+
+        /* -------------------------------------------------------------
+           1. MONTE CARLO SIMULATOR ENGINE
+           ------------------------------------------------------------- */
+        let simState = {
+            mu: 100,
+            sigma: 15,
+            n: 36,
+            cl: 0.95,
+            z: 1.96,
+            samples: [],
+            total: 0,
+            captured: 0,
+            missed: 0
+        };
+
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            if (!canvas.parentElement) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * (window.devicePixelRatio || 1);
+            canvas.height = 360 * (window.devicePixelRatio || 1);
+            ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+        }
+
+        window.addEventListener('resize', () => {
+            if (currentTab === 'sim') {
+                resizeCanvas();
+                drawSimCanvas();
+            }
+        });
+
+        function setSimCL(cl) {
+            simState.cl = cl;
+            if (cl === 0.90) simState.z = 1.645;
+            else if (cl === 0.95) simState.z = 1.96;
+            else if (cl === 0.99) simState.z = 2.575;
+
+            document.querySelectorAll('.sim-cl-btn').forEach(btn => {
+                btn.className = 'sim-cl-btn py-1.5 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-600 border border-slate-200 hover:border-indigo-400';
+            });
+            const selectedBtn = document.getElementById(`sim-cl-${Math.round(cl * 100)}`);
+            if (selectedBtn) {
+                selectedBtn.className = 'sim-cl-btn py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white border border-indigo-600 shadow-sm';
+            }
+
+            resetSimulation();
+        }
+
+        function updateSimParams() {
+            simState.mu = parseFloat(document.getElementById('sim-mu').value);
+            simState.sigma = parseFloat(document.getElementById('sim-sigma').value);
+            simState.n = parseInt(document.getElementById('sim-n').value);
+
+            document.getElementById('sim-mu-val').innerText = simState.mu;
+            document.getElementById('sim-sigma-val').innerText = simState.sigma;
+            document.getElementById('sim-n-val').innerText = simState.n;
+
+            const nHint = document.getElementById('sim-n-hint');
+            if (simState.n < 30) {
+                nHint.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Small sample (n < 30): Requires normal population assumption.';
+                nHint.className = 'text-[11px] font-semibold text-amber-600 mt-1 flex items-center gap-1';
+            } else {
+                nHint.innerHTML = '<i class="fa-solid fa-circle-check"></i> Large sample (n ≥ 30): Central Limit Theorem applies.';
+                nHint.className = 'text-[11px] font-semibold text-emerald-600 mt-1 flex items-center gap-1';
+            }
+
+            resetSimulation();
+        }
+
+        function updateSpeedLabel() {
+            const val = document.getElementById('sim-speed').value;
+            const labels = { '1': 'Slow', '2': 'Medium', '3': 'Normal', '4': 'Fast', '5': 'Instant' };
+            document.getElementById('sim-speed-val').innerText = labels[val];
+        }
+
+        function resetSimulation() {
+            simState.samples = [];
+            simState.total = 0;
+            simState.captured = 0;
+            simState.missed = 0;
+            document.getElementById('simEmptyState').style.display = 'flex';
+            updateSimStats();
+            drawSimCanvas();
+        }
+
+        // Standard Normal Random Variate
+        function randNormal() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        function takeOneSample() {
+            let sum = 0;
+            for (let i = 0; i < simState.n; i++) {
+                sum += simState.mu + randNormal() * simState.sigma;
+            }
+            const xbar = sum / simState.n;
+            const me = simState.z * (simState.sigma / Math.sqrt(simState.n));
+            const lower = xbar - me;
+            const upper = xbar + me;
+            const captured = lower <= simState.mu && simState.mu <= upper;
+
+            simState.total++;
+            if (captured) simState.captured++;
+            else simState.missed++;
+
+            const sample = { xbar, lower, upper, captured, id: simState.total };
+            simState.samples.push(sample);
+
+            if (simState.samples.length > 40) {
+                simState.samples.shift(); // Keep latest 40
+            }
+        }
+
+        function runSimulation(count) {
+            document.getElementById('simEmptyState').style.display = 'none';
+            const speed = parseInt(document.getElementById('sim-speed').value);
+            addActivityPoints(count === 1 ? 2 : 10);
+
+            if (count === 1 || speed === 5) {
+                for (let i = 0; i < count; i++) {
+                    takeOneSample();
+                }
+                updateSimStats();
+                drawSimCanvas();
+            } else {
+                let delay = 250 / speed;
+                let c = 0;
+                function step() {
+                    takeOneSample();
+                    updateSimStats();
+                    drawSimCanvas();
+                    c++;
+                    if (c < count) {
+                        setTimeout(step, delay);
+                    }
+                }
+                step();
+            }
+        }
+
+        function updateSimStats() {
+            document.getElementById('stat-total').innerText = simState.total;
+            document.getElementById('stat-captured').innerText = simState.captured;
+            document.getElementById('stat-missed').innerText = simState.missed;
+            const rate = simState.total === 0 ? 0 : ((simState.captured / simState.total) * 100).toFixed(1);
+            document.getElementById('stat-rate').innerText = rate + '%';
+        }
+
+        function drawSimCanvas() {
+            const width = canvas.width / (window.devicePixelRatio || 1);
+            const height = canvas.height / (window.devicePixelRatio || 1);
+
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw clean background grid lines
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let x = 40; x < width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+
+            // X-axis Scale (Mu centered)
+            const range = simState.sigma * 1.5;
+            const minX = simState.mu - range;
+            const maxX = simState.mu + range;
+
+            function toCanvasX(val) {
+                return ((val - minX) / (maxX - minX)) * (width - 80) + 40;
+            }
+
+            // Center Reference Line (True Mu)
+            const muX = toCanvasX(simState.mu);
+            ctx.beginPath();
+            ctx.setLineDash([6, 6]);
+            ctx.strokeStyle = '#f59e0b'; // Gold
+            ctx.lineWidth = 3;
+            ctx.moveTo(muX, 10);
+            ctx.lineTo(muX, height - 30);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Label True Mu
+            ctx.fillStyle = '#b45309';
+            ctx.font = 'bold 12px Plus Jakarta Sans';
+            ctx.textAlign = 'center';
+            ctx.fillText(`True µ = ${simState.mu}`, muX, height - 10);
+
+            // Draw intervals
+            const maxVisible = 30;
+            const visibleSamples = simState.samples.slice(-maxVisible);
+            const rowHeight = (height - 50) / maxVisible;
+
+            visibleSamples.forEach((s, idx) => {
+                const y = 20 + idx * rowHeight;
+                const x1 = toCanvasX(s.lower);
+                const x2 = toCanvasX(s.upper);
+                const xMean = toCanvasX(s.xbar);
+
+                // Interval Line
+                ctx.beginPath();
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = s.captured ? '#10b981' : '#ef4444'; // Emerald captured, Coral missed
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.stroke();
+
+                // Caps at ends
+                ctx.beginPath();
+                ctx.moveTo(x1, y - 3.5);
+                ctx.lineTo(x1, y + 3.5);
+                ctx.moveTo(x2, y - 3.5);
+                ctx.lineTo(x2, y + 3.5);
+                ctx.stroke();
+
+                // Center Point Dot
+                ctx.beginPath();
+                ctx.fillStyle = s.captured ? '#059669' : '#dc2626';
+                ctx.arc(xMean, y, 3.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        /* -------------------------------------------------------------
+           2. STEP-BY-STEP CALCULATION LOGIC
+           ------------------------------------------------------------- */
+        function switchCalcType(type) {
+            currentCalcType = type;
+            const btnMean = document.getElementById('calc-type-mean');
+            const btnProp = document.getElementById('calc-type-prop');
+            const inputsMean = document.getElementById('inputs-mean');
+            const inputsProp = document.getElementById('inputs-prop');
+
+            if (type === 'mean') {
+                btnMean.className = 'flex-1 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-indigo-700 bg-white shadow-sm flex items-center justify-center gap-2 transition-all';
+                btnProp.className = 'flex-1 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition-all';
+                inputsMean.classList.remove('hidden');
+                inputsProp.classList.add('hidden');
+            } else {
+                btnProp.className = 'flex-1 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-indigo-700 bg-white shadow-sm flex items-center justify-center gap-2 transition-all';
+                btnMean.className = 'flex-1 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition-all';
+                inputsProp.classList.remove('hidden');
+                inputsMean.classList.add('hidden');
+            }
+            calculateCI();
+        }
+
+        function syncPropInput(source) {
+            let n = parseInt(document.getElementById('input-n-prop').value) || 1;
+            let x = parseInt(document.getElementById('input-x-prop').value) || 0;
+            let phat = parseFloat(document.getElementById('input-phat').value) || 0;
+
+            if (source === 'x' || source === 'n') {
+                phat = Math.min(1, Math.max(0, x / n));
+                document.getElementById('input-phat').value = phat.toFixed(4);
+            } else if (source === 'phat') {
+                x = Math.round(phat * n);
+                document.getElementById('input-x-prop').value = x;
+            }
+
+            const np = n * phat;
+            const n1p = n * (1 - phat);
+            const condBox = document.getElementById('prop-condition-check');
+            if (np >= 10 && n1p >= 10) {
+                condBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> Condition check: n·p̂ = ${np.toFixed(1)} ≥ 10, n(1-p̂) = ${n1p.toFixed(1)} ≥ 10. Normal approximation holds.`;
+                condBox.className = 'text-[11px] font-semibold text-emerald-700 mt-1';
+            } else {
+                condBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Warning: n·p̂ (${np.toFixed(1)}) or n(1-p̂) (${n1p.toFixed(1)}) < 10. Large sample condition weak!`;
+                condBox.className = 'text-[11px] font-semibold text-amber-700 mt-1';
+            }
+            calculateCI();
+        }
+
+        document.getElementById('calc-cl-select').addEventListener('change', function() {
+            if (this.value === 'custom') {
+                document.getElementById('custom-cl-box').classList.remove('hidden');
+            } else {
+                document.getElementById('custom-cl-box').classList.add('hidden');
+            }
+            calculateCI();
+        });
+
+        function getZValue() {
+            const sel = document.getElementById('calc-cl-select').value;
+            if (sel === '0.90') return { z: 1.645, clText: '90%' };
+            if (sel === '0.95') return { z: 1.96, clText: '95%' };
+            if (sel === '0.99') return { z: 2.575, clText: '99%' };
+
+            const customVal = parseFloat(document.getElementById('input-custom-cl').value) || 95;
+            const p = 1 - (1 - customVal / 100) / 2;
+            let z = 1.96;
+            if (customVal === 98) z = 2.326;
+            else {
+                const t = Math.sqrt(-2 * Math.log(1 - p));
+                z = t - (2.515517 + 0.802853 * t + 0.010328 * t * t) / (1 + 1.432788 * t + 0.189269 * t * t + 0.001308 * t * t * t);
+            }
+            return { z: parseFloat(z.toFixed(4)), clText: `${customVal}%` };
+        }
+
+        function calculateCI() {
+            const { z, clText } = getZValue();
+            const stepsDiv = document.getElementById('solution-steps');
+
+            if (currentCalcType === 'mean') {
+                const xbar = parseFloat(document.getElementById('input-xbar').value) || 0;
+                const std = parseFloat(document.getElementById('input-std').value) || 1;
+                const n = parseInt(document.getElementById('input-n-mean').value) || 1;
+
+                const se = std / Math.sqrt(n);
+                const me = z * se;
+                const lower = xbar - me;
+                const upper = xbar + me;
+
+                stepsDiv.innerHTML = `
+                    <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-600">
+                        <span class="text-xs font-bold text-indigo-900 font-sans block mb-0.5">Step 1: Given Sample Statistics & Critical Value</span>
+                        &bar;x = ${xbar}, &sigma; (or s) = ${std}, n = ${n}<br>
+                        For ${clText} confidence level, z<sub>&alpha;/2</sub> = <span class="text-indigo-600 font-bold">${z}</span>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-600">
+                        <span class="text-xs font-bold text-indigo-900 font-sans block mb-0.5">Step 2: Standard Error & Margin of Error</span>
+                        SE = &sigma; / &sqrt;n = ${std} / &sqrt;${n} = <span class="text-slate-700 font-bold">${se.toFixed(5)}</span><br>
+                        Margin of Error (E) = z<sub>&alpha;/2</sub> &middot; (&sigma; / &sqrt;n) = ${z} &times; ${se.toFixed(5)} = <span class="text-indigo-700 font-bold">${me.toFixed(4)}</span>
+                    </div>
+
+                    <div class="p-3 bg-emerald-50 rounded-xl border-l-4 border-emerald-500">
+                        <span class="text-xs font-bold text-emerald-900 font-sans block mb-0.5">Step 3: Construct ${clText} Confidence Interval for &mu;</span>
+                        Confidence Interval = &bar;x &plusmn; z<sub>&alpha;/2</sub> &middot; (&sigma; / &sqrt;n)<br>
+                        = ${xbar} &plusmn; ${me.toFixed(4)}<br>
+                        = <span class="font-bold text-emerald-700">(${lower.toFixed(4)}, ${upper.toFixed(4)})</span>
+                    </div>
+                `;
+
+                document.getElementById('final-ci-text').innerText = `(${lower.toFixed(4)}, ${upper.toFixed(4)})`;
+                document.getElementById('final-me-text').innerText = `\u00B1 ${me.toFixed(4)}`;
+
+            } else {
+                const phat = parseFloat(document.getElementById('input-phat').value) || 0;
+                const n = parseInt(document.getElementById('input-n-prop').value) || 1;
+
+                const qhat = 1 - phat;
+                const se = Math.sqrt((phat * qhat) / n);
+                const me = z * se;
+                const lower = Math.max(0, phat - me);
+                const upper = Math.min(1, phat + me);
+
+                stepsDiv.innerHTML = `
+                    <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-600">
+                        <span class="text-xs font-bold text-indigo-900 font-sans block mb-0.5">Step 1: Point Estimate and Critical Z-value</span>
+                        p̂ = ${phat.toFixed(4)}, 1 - p̂ = ${qhat.toFixed(4)}, n = ${n}<br>
+                        For ${clText} confidence level, z<sub>&alpha;/2</sub> = <span class="text-indigo-600 font-bold">${z}</span>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-indigo-600">
+                        <span class="text-xs font-bold text-indigo-900 font-sans block mb-0.5">Step 2: Standard Error & Margin of Error</span>
+                        SE = &sqrt;[p̂(1 - p̂) / n] = &sqrt;[(${phat.toFixed(4)} &times; ${qhat.toFixed(4)}) / ${n}] = <span class="text-slate-700 font-bold">${se.toFixed(5)}</span><br>
+                        Margin of Error (E) = ${z} &times; ${se.toFixed(5)} = <span class="text-indigo-700 font-bold">${me.toFixed(4)}</span>
+                    </div>
+
+                    <div class="p-3 bg-emerald-50 rounded-xl border-l-4 border-emerald-500">
+                        <span class="text-xs font-bold text-emerald-900 font-sans block mb-0.5">Step 3: Construct ${clText} Confidence Interval for p</span>
+                        Confidence Interval = p̂ &plusmn; z<sub>&alpha;/2</sub> &middot; &sqrt;[p̂(1 - p̂) / n]<br>
+                        = ${phat.toFixed(4)} &plusmn; ${me.toFixed(4)}<br>
+                        = <span class="font-bold text-emerald-700">(${lower.toFixed(4)}, ${upper.toFixed(4)})</span>
+                    </div>
+                `;
+
+                document.getElementById('final-ci-text').innerText = `(${lower.toFixed(4)}, ${upper.toFixed(4)})`;
+                document.getElementById('final-me-text').innerText = `\u00B1 ${me.toFixed(4)}`;
+            }
+        }
+
+        function copySolution() {
+            const stepsText = document.getElementById('solution-steps').innerText;
+            const finalCI = document.getElementById('final-ci-text').innerText;
+            const fullText = stepsText + "\n\nFinal Confidence Interval: " + finalCI;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = fullText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            showToast('DSE solution presentation copied to clipboard!');
+            addActivityPoints(5);
+        }
+
+        /* -------------------------------------------------------------
+           3. SAMPLE SIZE & WIDTH EXPERIMENT LOGIC
+           ------------------------------------------------------------- */
+        function updateWidthExperiment() {
+            const n = parseInt(document.getElementById('exp-n').value);
+            const sigma = parseFloat(document.getElementById('exp-sigma').value);
+            const clChoice = parseInt(document.getElementById('exp-cl').value);
+
+            let z = 1.96;
+            let clText = '95% (z = 1.96)';
+            if (clChoice === 1) { z = 1.645; clText = '90% (z = 1.645)'; }
+            else if (clChoice === 3) { z = 2.575; clText = '99% (z = 2.575)'; }
+
+            document.getElementById('exp-n-val').innerText = n;
+            document.getElementById('exp-sigma-val').innerText = sigma;
+            document.getElementById('exp-cl-val').innerText = clText;
+
+            const me = z * (sigma / Math.sqrt(n));
+            const width = 2 * me;
+
+            document.getElementById('exp-me-val').innerText = me.toFixed(3);
+            document.getElementById('exp-width-val').innerText = width.toFixed(3);
+            document.getElementById('exp-bar-text').innerText = me.toFixed(2);
+
+            const pct = Math.min(100, Math.max(8, (width / 25) * 100));
+            document.getElementById('exp-bar').style.width = pct + '%';
+        }
+
+        function solveMinN() {
+            const E = parseFloat(document.getElementById('req-e').value) || 1;
+            const sigma = parseFloat(document.getElementById('req-sigma').value) || 1;
+            const z = parseFloat(document.getElementById('req-cl').value) || 1.96;
+
+            const term = (z * sigma) / E;
+            const rawN = term * term;
+            const finalN = Math.ceil(rawN);
+
+            document.getElementById('req-step1').innerHTML = `n &ge; (${z} &times; ${sigma} / ${E})&sup2;`;
+            document.getElementById('req-step2').innerHTML = `n &ge; ${rawN.toFixed(4)}...`;
+            document.getElementById('req-final-n').innerText = finalN;
+        }
+
+        /* -------------------------------------------------------------
+           4. DSE M1 QUIZ ENGINE
+           ------------------------------------------------------------- */
+        const quizData = [
+            {
+                q: "A 95% confidence interval for population mean μ is calculated as (42.5, 48.5). Which statement is CORRECT according to the HKDSE M1 syllabus?",
+                options: [
+                    "There is a 95% probability that the true mean μ lies between 42.5 and 48.5.",
+                    "If the sampling experiment is repeated many times, about 95% of constructed intervals will contain μ.",
+                    "95% of the individual sample data points lie between 42.5 and 48.5.",
+                    "The probability that another sample mean lies in (42.5, 48.5) is exactly 0.95."
+                ],
+                correct: 1,
+                explanation: "Option B is correct. In frequentist statistics (DSE M1), μ is a fixed unknown constant. Once an interval is calculated, it either contains μ or it doesn't. '95% confidence' refers to the long-run success rate of repeated sampling."
+            },
+            {
+                q: "To reduce the width of a 95% confidence interval to HALF of its original width, how should sample size n be adjusted?",
+                options: [
+                    "Double the sample size (2×)",
+                    "Quadruple the sample size (4×)",
+                    "Increase the sample size by 50%",
+                    "Square the sample size (n²)"
+                ],
+                correct: 1,
+                explanation: "Width = 2 · z · (σ / √n). To halve the Width, √n must double, meaning n must be multiplied by 2² = 4."
+            },
+            {
+                q: "In calculating the least sample size required such that maximum error bound does not exceed E, a student calculates n ≥ 124.02. What is the least integer value of n?",
+                options: [
+                    "124",
+                    "125",
+                    "124.02",
+                    "130"
+                ],
+                correct: 1,
+                explanation: "For inequality n ≥ 124.02, the smallest integer satisfying the condition is 125. In sample size calculations, always round UP to ensure error does not exceed E."
+            },
+            {
+                q: "Which of the following changes will result in a WIDER confidence interval?",
+                options: [
+                    "Increasing the sample size n",
+                    "Decreasing the confidence level from 95% to 90%",
+                    "Increasing the population standard deviation σ",
+                    "Decreasing the sample mean x̄"
+                ],
+                correct: 2,
+                explanation: "Margin of Error E = z · (σ / √n). Increasing σ increases E, widening the interval. Decreasing confidence level decreases z (narrower). Increasing n decreases E (narrower)."
+            }
+        ];
+
+        let quizUserAnswers = {};
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            document.getElementById('quiz-total').innerText = quizData.length;
+
+            quizData.forEach((q, idx) => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3";
+
+                let optionsHTML = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHTML += `
+                        <label onclick="checkQuizAnswer(${idx}, ${optIdx})" class="quiz-opt-${idx} block p-3.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/50 cursor-pointer text-xs font-semibold text-slate-700 transition-all shadow-xs">
+                            <input type="radio" name="quiz-${idx}" class="hidden">
+                            <span class="font-extrabold text-indigo-600 mr-2">${String.fromCharCode(65 + optIdx)}.</span> ${opt}
+                        </label>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-2.5">
+                        <span class="bg-indigo-600 text-white text-xs font-black px-2.5 py-1 rounded-lg shadow-sm">Q${idx + 1}</span>
+                        <p class="text-sm font-bold text-slate-900 leading-relaxed">${q.q}</p>
+                    </div>
+                    <div class="space-y-2 pt-1">${optionsHTML}</div>
+                    <div id="quiz-exp-${idx}" class="hidden p-3.5 rounded-xl text-xs space-y-1"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function checkQuizAnswer(qIdx, optIdx) {
+            quizUserAnswers[qIdx] = optIdx;
+            const q = quizData[qIdx];
+            const isCorrect = optIdx === q.correct;
+
+            const options = document.querySelectorAll(`.quiz-opt-${qIdx}`);
+            options.forEach((optEl, i) => {
+                if (i === q.correct) {
+                    optEl.className = "block p-3.5 rounded-xl bg-emerald-100 border border-emerald-400 text-xs text-emerald-900 font-bold shadow-sm";
+                } else if (i === optIdx && !isCorrect) {
+                    optEl.className = "block p-3.5 rounded-xl bg-rose-100 border border-rose-400 text-xs text-rose-900 font-bold shadow-sm";
+                } else {
+                    optEl.className = "block p-3.5 rounded-xl bg-white border border-slate-100 text-xs text-slate-400 opacity-60";
+                }
+            });
+
+            const expBox = document.getElementById(`quiz-exp-${qIdx}`);
+            expBox.classList.remove('hidden');
+            if (isCorrect) {
+                expBox.className = "p-3.5 rounded-xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-900 space-y-1";
+                expBox.innerHTML = `<span class="font-extrabold text-emerald-700 flex items-center gap-1.5"><i class="fa-solid fa-circle-check"></i> Correct!</span>${q.explanation}`;
+                showToast('Correct Answer! +10 XP', 'fa-trophy text-amber-400');
+                addActivityPoints(10);
+            } else {
+                expBox.className = "p-3.5 rounded-xl text-xs bg-rose-50 border border-rose-200 text-rose-900 space-y-1";
+                expBox.innerHTML = `<span class="font-extrabold text-rose-700 flex items-center gap-1.5"><i class="fa-solid fa-circle-xmark"></i> Incorrect</span>${q.explanation}`;
+            }
+
+            let score = 0;
+            Object.keys(quizUserAnswers).forEach(key => {
+                if (quizUserAnswers[key] === quizData[key].correct) score++;
+            });
+            document.getElementById('quiz-score').innerText = score;
+        }
+
+        window.onload = function() {
+            resizeCanvas();
+            drawSimCanvas();
+            calculateCI();
+            updateWidthExperiment();
+            solveMinN();
+            renderQuiz();
+        };
+    </script>
+</body>
+</html>
